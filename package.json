@@ -1,0 +1,14 @@
+{
+  "name": "image-compare-app",
+  "version": "1.0.0",
+  "description": "app to compare similar/duplicate images before deleting",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "muhallilahnaf",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^12.0.1"
+  }
+}

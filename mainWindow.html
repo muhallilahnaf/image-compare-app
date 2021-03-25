@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+    <section id="container">
+        <section id="sidebar">
+            <!-- <div style="height: 1000vh;"></div> -->
+        </section>
+        <section id="main">
+            <div id="picdiv">
+                <div id="pic1div">
+                    <div id="pic1"></div>
+                    <div id="pic1name"></div>
+                    <button id="delete1">delete</button>
+                </div>
+                <div id="pic2div">
+                    <div id="pic2"></div>
+                    <div id="pic2name"></div>
+                    <button id="delete2">delete</button>
+                </div>
+            </div>
+            <div id="controldiv">
+                <button id="prev">prev</button>
+                <button id="keep">keep</button>
+                <button id="next">next</button>
+            </div>
+        </section>
+    </section>
+    <script>
+        document.getElementById('prev').addEventListener('click', () => {
+            window.api.send('dim', `${window.innerWidth}x${window.innerHeight}`)
+        })
+
+
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            for (const f of e.dataTransfer.files) {
+                console.log('File(s) you dragged here: ', f.path)
+            }
+        });
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    </script>
+    <!-- <script src="./fs-helpers.js"></script>
+    <script src="./index.js"></script> -->
+</body>
+
+</html>
