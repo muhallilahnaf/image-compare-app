@@ -1,32 +1,44 @@
+const { basename } = require('path')
+
+// function to remove duplicate file strings
+// eg. ' - Copy' or '({number})' etc.
+const processfName = (f) => {
+    // const fName = basename(f)
+    return f.replace(/\(\d+\)/, '').replace(/ - Copy/, '')
+}
+
+
 // function to find duplicates from a sorted array
 // in: sorted array to find duplicates from
 // out: array of objects containing duplicates
-const findDups = (arr) => {
-    const len = arr.length
+const findDups = (dict) => {
+    const len = Object.keys(dict).length
+
     let matches = []
+    let processedDict = {}
 
-    if (len === 0 || len === 1) return matches
+    if (len === 0) return matches
 
-    let i = 0
-    let j = 1
+    for (const [file, urlArr] of Object.entries(dict)) {
+        const processedFile = processfName(file)
 
-    while (j < len) {
-
-        if (arr[i] !== arr[j]) {
-            i++
-            arr[i] = arr[j]
-            j++
+        if (typeof processedDict[processedFile] === 'undefined') {
+            processedDict[processedFile] = urlArr
         } else {
-            matches.push({
-                one: arr[i],
-                another: arr[j]
-            })
-            j++
+            processedDict[processedFile] = [...processedDict[processedFile], ...urlArr]
+        }
+    }
+
+    for (const [file, urlArr] of Object.entries(processedDict)) {
+
+        if (urlArr.length > 1) {
+            matches.push({ 'basename': file, 'urls': urlArr })
         }
     }
 
     return matches
 }
+
 
 // image file extensions
 const extensions = ['jpeg', 'jpg', 'png', 'gif', 'tif', 'tiff', 'bmp']

@@ -21,6 +21,7 @@ const createMainWindow = () => {
 
     // Create new window
     mainWindow = new BrowserWindow({
+        backgroundColor: '#252525',
         width: 1366,
         minWidth: 1260,
         height: 768,
@@ -57,6 +58,7 @@ const createScanWindow = () => {
     scanWindow = new BrowserWindow({
         parent: mainWindow,
         modal: true,
+        backgroundColor: '#252525',
         width: 800,
         height: 400,
         resizable: false,

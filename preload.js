@@ -6,13 +6,13 @@ const { ipcRenderer, contextBridge } = require('electron')
 contextBridge.exposeInMainWorld('api', {
     send: (channel, data) => {
         // whitelist channels
-        let validChannels = ['dim', 'scan:add', 'scan:start']
+        let validChannels = ['scan:add', 'scan:start', 'main:delete']
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data)
         }
     },
     receive: (channel, func) => {
-        let validChannels = ['scan:add', 'scan:finish']
+        let validChannels = ['scan:add', 'scan:finish', 'main:load', 'main:deleted']
         if (validChannels.includes(channel)) {
             ipcRenderer.on(channel, (e, ...args) => {
                 func(...args)

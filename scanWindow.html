@@ -97,7 +97,6 @@
 
     // receive info from main for scan:finish
     window.api.receive('scan:finish', (data) => {
-        alert(data)
         clearInterval(intervalId)
         scan.removeAttribute('disabled')
         scan.innerHTML = 'Scan'

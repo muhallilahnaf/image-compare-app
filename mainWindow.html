@@ -9,47 +9,144 @@
 
 <body>
     <section id="container">
-        <section id="sidebar">
-            <!-- <div style="height: 1000vh;"></div> -->
-        </section>
+        <section id="sidebar"></section>
         <section id="main">
             <div id="picdiv">
-                <div id="pic1div">
-                    <div id="pic1"></div>
-                    <div id="pic1name"></div>
-                    <button id="delete1">delete</button>
-                </div>
-                <div id="pic2div">
-                    <div id="pic2"></div>
-                    <div id="pic2name"></div>
-                    <button id="delete2">delete</button>
-                </div>
-            </div>
-            <div id="controldiv">
-                <button id="prev">prev</button>
-                <button id="keep">keep</button>
-                <button id="next">next</button>
+                <div id="pic"></div>
+                <div id="picname"></div>
+                <button id="delete">delete</button>
             </div>
         </section>
     </section>
     <script>
-        document.getElementById('prev').addEventListener('click', () => {
-            window.api.send('dim', `${window.innerWidth}x${window.innerHeight}`)
+        'use strict'
+
+        const sidebar = document.getElementById('sidebar')
+        const pic = document.getElementById('pic')
+        const picname = document.getElementById('picname')
+        const deleteButton = document.getElementById('delete')
+
+        let matches = null
+        let currentIndex = null
+        let currentUrl = null
+
+        // clear sidebar
+        const clearSidebar = () => {
+            while (sidebar.firstChild) {
+                sidebar.firstChild.remove()
+            }
+        }
+
+        // load pic and filename in box
+        const loadPic = () => {
+            if (currentUrl !== null) {
+                pic.style.background = `url('file:///${currentUrl}')` // FIX
+                pic.style.backgroundRepeat = 'no-repeat'
+                pic.style.backgroundSize = 'contain'
+                picname.innerHTML = currentUrl
+            } else {
+                pic.style.background = 'none'
+                picname.innerHTML = ''
+            }
+        }
+
+        // reset current values
+        const resetCurrent = () => {
+            currentUrl = null
+            currentIndex = null
+        }
+
+        // remove url node from sidebar
+        const removeUrlNode = (url) => {
+            const targetParent = document.querySelector(`.match-${currentIndex}`)
+            const targetUrls = targetParent.querySelectorAll('.url')
+
+            for (const node of targetUrls) {
+                if (node.innerHTML.trim() === url) node.remove()
+            }
+        }
+
+        // load matches data in sidebar
+        const loadSidebar = (m) => {
+            // update matches variable and clear sidebar
+            matches = m
+            clearSidebar()
+
+            // populate sidebar and add listener on urls
+            m.forEach((match, i) => {
+                console.log(match)
+                const div = document.createElement('div')
+                div.className = `match match-${i}`
+
+                const p = document.createElement('p')
+                p.className = 'basename'
+                p.innerHTML = match.basename
+                div.appendChild(p)
+
+                match.urls.forEach(url => {
+                    const pInner = document.createElement('p')
+                    pInner.className = 'url'
+                    pInner.innerHTML = url
+
+                    pInner.addEventListener('click', e => {
+                        // set current variable and load pic
+                        currentUrl = url
+                        currentIndex = i
+                        loadPic()
+                    })
+                    div.appendChild(pInner)
+                })
+
+                sidebar.appendChild(div)
+            })
+        }
+
+        // main:load
+        window.api.receive('main:load', (matchs) => {
+            console.log('main:load')
+            loadSidebar(matchs)
+            console.log('load done')
         })
 
-
-        document.addEventListener('drop', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            for (const f of e.dataTransfer.files) {
-                console.log('File(s) you dragged here: ', f.path)
+        deleteButton.addEventListener('click', () => {
+            if (currentUrl !== null) {
+                window.api.send('main:delete', currentUrl)
             }
-        });
-        document.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-        });
+        })
+
+        // main:deleted
+        window.api.receive('main:deleted', url => {
+            const urls = matches[currentIndex].urls
+
+            // check if matches with current index and current url
+            if (urls.includes(url) && url === currentUrl) {
+                newUrls = urls.filter(u => u !== url)
+
+                // change matches array
+                matches[currentIndex].urls = newUrls
+
+                // reset current values and pic background
+                resetCurrent()
+                loadPic()
+
+                // update sidebar
+                removeUrlNode(url)
+            } else {
+                alert('error')
+            }
+        })
+        // document.addEventListener('drop', (e) => {
+        //     e.preventDefault();
+        //     e.stopPropagation();
+
+        //     for (const f of e.dataTransfer.files) {
+        //         console.log('File(s) you dragged here: ', f.path)
+        //     }
+        // });
+        // document.addEventListener('dragover', (e) => {
+        //     e.preventDefault();
+        //     e.stopPropagation();
+        // });
     </script>
     <!-- <script src="./fs-helpers.js"></script>
     <script src="./index.js"></script> -->

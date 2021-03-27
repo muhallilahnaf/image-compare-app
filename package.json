@@ -9,6 +9,7 @@
   "author": "muhallilahnaf",
   "license": "MIT",
   "dependencies": {
-    "electron": "^12.0.1"
+    "electron": "^12.0.1",
+    "trash": "^7.1.1"
   }
 }
