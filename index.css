@@ -44,21 +44,28 @@ button {
 .match {
     margin: 10px 5px;
     padding: 5px;
-    background-color: grey;
+    background-color: #505050;
     border-radius: 5px;
     overflow-wrap: break-word;
 }
 
 .match .basename {
+    margin: 2px 2px 5px 2px;
     padding: 5px;
+    border-radius: 5px;
 }
 
 .match .url {
     cursor: pointer;
+    margin: 3px 2px 2px 20px;
+    padding: 3px;
+    border-radius: 5px;
+    font-size: small;
+    background-color: #707070;
 }
 
 .match .url:hover {
-    opacity: 0.8;
+    opacity: 0.6;
 }
 
 #main {

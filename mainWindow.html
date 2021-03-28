@@ -29,6 +29,7 @@
         let matches = null
         let currentIndex = null
         let currentUrl = null
+        let currentFileUrl = null
 
         // clear sidebar
         const clearSidebar = () => {
@@ -39,8 +40,8 @@
 
         // load pic and filename in box
         const loadPic = () => {
-            if (currentUrl !== null) {
-                pic.style.background = `url('file:///${currentUrl}')` // FIX
+            if (currentFileUrl !== null) {
+                pic.style.background = `url('${currentFileUrl}')`
                 pic.style.backgroundRepeat = 'no-repeat'
                 pic.style.backgroundSize = 'contain'
                 picname.innerHTML = currentUrl
@@ -53,7 +54,15 @@
         // reset current values
         const resetCurrent = () => {
             currentUrl = null
+            currentFileUrl = null
             currentIndex = null
+        }
+
+        // set current values
+        const setCurrent = (node) => {
+            currentFileUrl = node.matchesFileURL
+            currentUrl = node.matchesPath
+            currentIndex = node.matchesIndex
         }
 
         // remove url node from sidebar
@@ -62,7 +71,7 @@
             const targetUrls = targetParent.querySelectorAll('.url')
 
             for (const node of targetUrls) {
-                if (node.innerHTML.trim() === url) node.remove()
+                if (node.matchesPath === url) node.remove()
             }
         }
 
@@ -77,21 +86,29 @@
                 console.log(match)
                 const div = document.createElement('div')
                 div.className = `match match-${i}`
+                div.matchesIndex = i
 
                 const p = document.createElement('p')
                 p.className = 'basename'
                 p.innerHTML = match.basename
                 div.appendChild(p)
 
-                match.urls.forEach(url => {
+                match.urls.forEach(urlItem => {
                     const pInner = document.createElement('p')
                     pInner.className = 'url'
-                    pInner.innerHTML = url
+                    pInner.innerHTML = urlItem.path
+                    pInner.matchesIndex = i
+                    pInner.matchesPath = urlItem.path
+                    pInner.matchesFileURL = urlItem.fileURL
 
                     pInner.addEventListener('click', e => {
+                        // reset current values and pic background
+                        resetCurrent()
+                        loadPic()
+
+                        console.log(e.currentTarget)
                         // set current variable and load pic
-                        currentUrl = url
-                        currentIndex = i
+                        setCurrent(e.currentTarget)
                         loadPic()
                     })
                     div.appendChild(pInner)
@@ -108,33 +125,26 @@
             console.log('load done')
         })
 
+        // main:delete
         deleteButton.addEventListener('click', () => {
             if (currentUrl !== null) {
-                window.api.send('main:delete', currentUrl)
+                window.api.send('main:delete', { currentUrl, currentIndex })
             }
         })
 
         // main:deleted
-        window.api.receive('main:deleted', url => {
-            const urls = matches[currentIndex].urls
+        window.api.receive('main:deleted', obj => {
+            // change matches array
+            matches = obj.state.data
 
-            // check if matches with current index and current url
-            if (urls.includes(url) && url === currentUrl) {
-                newUrls = urls.filter(u => u !== url)
+            // update sidebar
+            removeUrlNode(obj.url)
 
-                // change matches array
-                matches[currentIndex].urls = newUrls
-
-                // reset current values and pic background
-                resetCurrent()
-                loadPic()
-
-                // update sidebar
-                removeUrlNode(url)
-            } else {
-                alert('error')
-            }
+            // reset current values and pic background
+            resetCurrent()
+            loadPic()
         })
+
         // document.addEventListener('drop', (e) => {
         //     e.preventDefault();
         //     e.stopPropagation();

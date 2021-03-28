@@ -19,12 +19,12 @@ const mainMenu = (createSWindow) => {
             label: 'Check',
             submenu: [
                 {
-                    label: 'Open JSON File',
+                    label: 'Open Scan Data',
                     accelerator: process.platform == 'darwin' ? 'Command+O' : 'Ctrl+O',
                     click: openFile
                 },
                 {
-                    label: 'Save JSON File',
+                    label: 'Save Scan Data',
                     accelerator: process.platform == 'darwin' ? 'Command+S' : 'Ctrl+S',
                     click: () => {
                         console.log(global.tanna)
@@ -39,7 +39,7 @@ const mainMenu = (createSWindow) => {
         {
             label: 'Quit',
             accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
-            click: () => app.quit()
+            click: () => { } //mainWindow.close()
         }
     ]
 

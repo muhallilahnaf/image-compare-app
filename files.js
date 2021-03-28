@@ -4,6 +4,7 @@ const { open, close, readFile, writeFileSync, readdirSync, statSync, unlinkSync 
 const { extensions, findDups } = require('./helpers')
 const { normalize } = require('path')
 const trash = require('trash')
+const { getState, setState } = require('./global')
 
 
 // vars
@@ -73,10 +74,12 @@ const openFolder = (item) => {
 
 
 // save scan result locally
-const saveScan = (m) => {
-    const saveToDir = dialog.showSaveDialogSync(scanWindow, {
+const saveScan = (m, win) => {
+    const time = new Date()
+    const fName = `duplicates_${time.getFullYear()}${time.getMonth()}${time.getDate()}_${time.getHours()}${time.getMinutes()}.json`
+    const saveToDir = dialog.showSaveDialogSync(win, {
         title: 'Save Scan Data',
-        defaultPath: normalize(`${app.getPath('documents')}/duplicates.json`),
+        defaultPath: normalize(`${app.getPath('documents')}/${fName}`),
         filters: [
             { name: 'JSON file', extensions: ['json'] }
         ]
@@ -85,9 +88,10 @@ const saveScan = (m) => {
     if (saveToDir) {
         console.log(saveToDir)
         writeFileSync(saveToDir, JSON.stringify(m, null, 4))
-        scanWindow.close()
+        return true
     } else {
         console.log('not saved')
+        return false
     }
 }
 
@@ -106,6 +110,36 @@ ipcMain.on('scan:add', (e, item) => {
 
 // scan:start
 ipcMain.on('scan:start', (e, dirs) => {
+
+    // check if unsaved state
+    let state = getState()
+
+    if (state.stage === 'unsaved') {
+        const ans = dialog.showMessageBoxSync(scanWindow, {
+            message: 'Save previous changes before new scan?',
+            type: 'question',
+            buttons: ['Save', 'Scan Without Saving'],
+            title: 'Save Data Before Scan',
+            cancelId: 2
+        })
+
+        if (ans === 0) {
+            if (saveScan(m, scanWindow)) {
+                const state = {
+                    'stage': 'initial',
+                    'data': []
+                }
+                setState(state)
+            }
+        }
+        if (ans === 1) {
+            const state = {
+                'stage': 'initial',
+                'data': []
+            }
+            setState(state)
+        }
+    }
 
     // variable to save files
     let fileDict = {}
@@ -162,21 +196,33 @@ ipcMain.on('scan:start', (e, dirs) => {
         const butIndex = dialog.showMessageBoxSync(scanWindow, {
             message: `${matches.length} duplicate(s) found.`,
             type: 'question',
-            buttons: ['Check Now', 'Save For Later'],
+            buttons: ['Check Now', 'Save Scan Data'],
             title: 'Scan Result',
             cancelId: 2,
-            detail: 'Check Now: check the duplicate images manually now\nSave For Later: save the scan results to check manually in the app later'
+            detail: 'Check Now: check the duplicate images manually now\nSave Scan Data: save the scan results to check manually in the app later'
         })
-
 
         if (butIndex === 0) {
             // check now
+            let newState = {
+                'stage': 'unsaved',
+                'data': matches
+            }
+            setState(newState)
+
             scanWindow.close()
             mainWindow.webContents.send('main:load', matches)
             console.log('check now')
         } else if (butIndex === 1) {
             // save matches in a file for later
-            saveScan(matches)
+            if (saveScan(matches, scanWindow)) {
+                const tmp = {
+                    'stage': 'initial',
+                    'data': []
+                }
+                setState(tmp)
+                scanWindow.close()
+            }
         }
 
 
@@ -195,7 +241,8 @@ ipcMain.on('scan:start', (e, dirs) => {
 
 
 // main:delete
-ipcMain.on('main:delete', (e, url) => {
+ipcMain.on('main:delete', (e, obj) => {
+    const url = obj.currentUrl
     const delIndex = dialog.showMessageBoxSync(mainWindow, {
         message: `Delete '${url}'?`,
         type: 'question',
@@ -206,12 +253,57 @@ ipcMain.on('main:delete', (e, url) => {
 
     if (delIndex === 1) moveToBin(url)
     if (delIndex === 2) unlinkSync(url)
-    if (delIndex !== 0) mainWindow.webContents.send('main:deleted', url)
+    if (delIndex !== 0) {
+
+        // update state
+        let state = getState()
+        state.data = state.data[obj.currentIndex].urls.filter(urlItem => {
+            urlItem.path !== url
+        })
+        state.stage = 'unsaved'
+        setState(state)
+
+        // main:deleted
+        mainWindow.webContents.send('main:deleted', { state, url })
+    }
 })
+
+
+// save before app close
+const saveBeforeClose = () => {
+    const ans = dialog.showMessageBoxSync(mainWindow, {
+        message: 'Save data before exit?',
+        type: 'question',
+        buttons: ['Save', 'Exit Without Saving'],
+        title: 'Save Data Before Exit',
+        cancelId: 2
+    })
+
+    if (ans === 0) {
+        const tmp = getState().data
+        if (saveScan(tmp, mainWindow)) {
+            const state = {
+                'stage': 'initial',
+                'data': []
+            }
+            setState(state)
+            mainWindow.close()
+        }
+    }
+    if (ans === 1) {
+        const state = {
+            'stage': 'initial',
+            'data': []
+        }
+        setState(state)
+        mainWindow.close()
+    }
+}
 
 // exports
 module.exports = {
     openFile,
     sendMain,
-    sendScan
+    sendScan,
+    saveBeforeClose
 }

@@ -1,4 +1,4 @@
-const { basename } = require('path')
+const { pathToFileURL } = require('url')
 
 // function to remove duplicate file strings
 // eg. ' - Copy' or '({number})' etc.
@@ -32,7 +32,16 @@ const findDups = (dict) => {
     for (const [file, urlArr] of Object.entries(processedDict)) {
 
         if (urlArr.length > 1) {
-            matches.push({ 'basename': file, 'urls': urlArr })
+            let newUrlArr = []
+
+            urlArr.forEach(url => {
+                newUrlArr.push({
+                    'path': url,
+                    'fileURL': pathToFileURL(url).href
+                })
+            })
+
+            matches.push({ 'basename': file, 'urls': newUrlArr })
         }
     }
 

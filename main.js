@@ -3,7 +3,8 @@ const { app, BrowserWindow, Menu, ipcMain } = require('electron')
 const url = require('url')
 const path = require('path')
 const { mainMenu } = require('./menu')
-const { sendMain, sendScan } = require('./files')
+const { sendMain, sendScan, saveBeforeClose } = require('./files')
+const { getState, setState } = require('./global')
 
 
 // SET ENV
@@ -38,6 +39,18 @@ const createMainWindow = () => {
     mainWindow.loadURL(
         url.fileURLToPath(`file:///${__dirname}/mainWindow.html`)
     )
+
+    // check for matches data on close
+    mainWindow.on('close', (e) => {
+        const state = getState()
+        if (state.stage === 'unsaved') {
+            e.preventDefault()
+            saveBeforeClose()
+        } else {
+            console.log('quit!')
+            // app.quit()
+        }
+    })
 
     // Quit app when closed
     mainWindow.on('closed', () => app.quit())
@@ -91,10 +104,4 @@ const createScanWindow = () => {
 
 // Listen for app to be ready
 app.on('ready', createMainWindow)
-
-
-// Catch dim
-ipcMain.on('dim', (e, item) => {
-    console.log(item)
-})
 
