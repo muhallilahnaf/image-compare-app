@@ -5,9 +5,10 @@ A cross platform desktop app to compare similar/duplicate images before deleting
 Made using [electron](https://www.electronjs.org).
 
 ## Downloads
-- [Windows]()
-- [Mac]()
-- [Debian]()
+- [Windows](https://github.com/muhallilahnaf/image-compare-app/releases/download/1.0.0/image-compare-app-v1.0.0-win32-ia32.zip)
+- [Windows Setup.exe](https://github.com/muhallilahnaf/image-compare-app/releases/download/1.0.0/Setup.exe)
+- [Mac](https://github.com/muhallilahnaf/image-compare-app/releases/download/1.0.0/imageCompare-v1.0.0-darwin-x64.zip)
+- [Debian](https://github.com/muhallilahnaf/image-compare-app/releases/download/1.0.0/image-compare-app-v1.0.0-linux-x64.zip)
 
 ### Features
 - scan directories recursively for duplicate/similar images (by file names)
