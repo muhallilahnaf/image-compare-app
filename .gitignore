@@ -2,3 +2,5 @@ node_modules
 package-lock.json
 test.html
 test.js
+release-builds
+createInstaller.js

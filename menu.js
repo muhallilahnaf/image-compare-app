@@ -1,7 +1,9 @@
 // imports
 const { app, Menu, shell } = require('electron')
-const { openFile } = require('./files')
+const { openFile, saveScanMenu } = require('./files')
 
+let mainWindow
+const getMainWindow = (m) => mainWindow = m
 
 // Build menu from template
 const mainMenu = (createSWindow) => {
@@ -11,13 +13,16 @@ const mainMenu = (createSWindow) => {
     // main menu template
     let mainMenuTemplate = [
         {
-            label: 'Scan',
-            accelerator: process.platform == 'darwin' ? 'Command+R' : 'Ctrl+R',
-            click: createScanWindow
-        },
-        {
-            label: 'Check',
+            label: 'File',
             submenu: [
+                {
+                    label: 'Scan',
+                    accelerator: process.platform == 'darwin' ? 'Command+X' : 'Ctrl+X',
+                    click: createScanWindow
+                },
+                {
+                    type: 'separator'
+                },
                 {
                     label: 'Open Scan Data',
                     accelerator: process.platform == 'darwin' ? 'Command+O' : 'Ctrl+O',
@@ -26,20 +31,26 @@ const mainMenu = (createSWindow) => {
                 {
                     label: 'Save Scan Data',
                     accelerator: process.platform == 'darwin' ? 'Command+S' : 'Ctrl+S',
-                    click: () => {
-                        console.log(global.tanna)
-                    }
+                    click: saveScanMenu
+                },
+                {
+                    type: 'separator'
+                },
+                {
+                    label: 'Quit',
+                    accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
+                    click: () => mainWindow.close()
                 }
             ]
         },
         {
             label: 'About',
-            click: () => shell.openExternal('https://muhallilahnaf.github.io')
-        },
-        {
-            label: 'Quit',
-            accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
-            click: () => { } //mainWindow.close()
+            submenu: [
+                {
+                    label: 'Website',
+                    click: () => shell.openExternal('https://muhallilahnaf.github.io/apps.html')
+                }
+            ]
         }
     ]
 
@@ -73,5 +84,6 @@ const mainMenu = (createSWindow) => {
 
 // exports
 module.exports = {
-    mainMenu
+    mainMenu,
+    getMainWindow
 }

@@ -2,7 +2,7 @@
 const { app, BrowserWindow, Menu, ipcMain } = require('electron')
 const url = require('url')
 const path = require('path')
-const { mainMenu } = require('./menu')
+const { mainMenu, getMainWindow } = require('./menu')
 const { sendMain, sendScan, saveBeforeClose } = require('./files')
 const { getState, setState } = require('./global')
 
@@ -23,6 +23,7 @@ const createMainWindow = () => {
     // Create new window
     mainWindow = new BrowserWindow({
         backgroundColor: '#252525',
+        icon: path.join(__dirname, 'assets/icons/png/64x64.png'),
         width: 1366,
         minWidth: 1260,
         height: 768,
@@ -43,7 +44,8 @@ const createMainWindow = () => {
     // check for matches data on close
     mainWindow.on('close', (e) => {
         const state = getState()
-        if (state.stage === 'unsaved') {
+        console.log(state)
+        if (state.stage === 'unsaved' && state.data.length > 0) {
             e.preventDefault()
             saveBeforeClose()
         } else {
@@ -61,6 +63,8 @@ const createMainWindow = () => {
     // send to files.js
     sendMain(mainWindow, mainWindowTitle)
 
+    // send to menu.js
+    getMainWindow(mainWindow)
 }
 
 

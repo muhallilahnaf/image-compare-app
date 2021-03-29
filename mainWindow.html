@@ -133,12 +133,10 @@
         })
 
         // main:deleted
-        window.api.receive('main:deleted', obj => {
-            // change matches array
-            matches = obj.state.data
+        window.api.receive('main:deleted', state => {
 
-            // update sidebar
-            removeUrlNode(obj.url)
+            // reload sidebar
+            loadSidebar(state.data)
 
             // reset current values and pic background
             resetCurrent()

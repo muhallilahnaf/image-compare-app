@@ -1,7 +1,7 @@
 // imports
 const { dialog, ipcMain, app } = require('electron')
-const { open, close, readFile, writeFileSync, readdirSync, statSync, unlinkSync } = require('fs')
-const { extensions, findDups } = require('./helpers')
+const { readFileSync, writeFileSync, readdirSync, statSync, unlinkSync } = require('fs')
+const { extensions, findDups, verifyFile } = require('./helpers')
 const { normalize } = require('path')
 const trash = require('trash')
 const { getState, setState } = require('./global')
@@ -13,29 +13,107 @@ let mainWindowTitle
 let scanWindow
 
 
+// save scan for menu
+const saveScanMenu = () => {
+
+    // check if unsaved state
+    let state = getState()
+
+    if (state.stage === 'unsaved' && state.data.length > 0) {
+
+        if (saveScan(state.data, mainWindow)) {
+            const state = {
+                'stage': 'initial',
+                'data': []
+            }
+            setState(state)
+        }
+    } else {
+        dialog.showMessageBoxSync(mainWindow, {
+            message: 'Nothing to save!',
+            type: 'info',
+            buttons: ['OK'],
+            defaultId: 0,
+            title: 'Save Scan Data'
+        })
+    }
+
+}
+
 // open file function for check menu
 const openFile = () => {
 
+    // check if unsaved state
+    let state = getState()
+
+
+    if (state.stage === 'unsaved' && state.data.length > 0) {
+        const ans = dialog.showMessageBoxSync(mainWindow, {
+            message: 'Save previous changes before opening a file?',
+            type: 'question',
+            buttons: ['Save', 'Open Without Saving'],
+            title: 'Save Data Before Open',
+            cancelId: 2
+        })
+
+        if (ans === 0) {
+            if (saveScan(state.data, mainWindow)) {
+                const state = {
+                    'stage': 'initial',
+                    'data': []
+                }
+                setState(state)
+            }
+        }
+        if (ans === 1) {
+            const state = {
+                'stage': 'initial',
+                'data': []
+            }
+            setState(state)
+        }
+    }
+
     // show file open dialog allowing only json file
-    dialog.showOpenDialog(mainWindow, {
+    const file = dialog.showOpenDialogSync(mainWindow, {
+        title: 'Select Scan Data',
+        defaultPath: normalize(app.getPath('documents')),
         filters: [
             { name: 'JSON file', extensions: ['json'] }
         ],
         properties: ['openFile']
-    }).then(res => {
-
-        // read json file
-        if (!res.canceled) {
-            mainWindow.setTitle(`${mainWindowTitle} [${res.filePaths[0]}]`)
-
-            readFile(res.filePaths[0], 'utf8', (err, data) => {
-                if (err) throw err
-                console.log(JSON.parse(data))
-            })
-        } else {
-            console.log('cancelled')
-        }
     })
+
+    if (file) {
+        // read json file
+        let data = readFileSync(file[0], 'utf8')
+        data = JSON.parse(data)
+
+        // verify file
+        if (verifyFile(data)) {
+            // set state and title
+            let newState = {
+                'stage': 'initial',
+                'data': data
+            }
+            setState(newState)
+            console.log(getState())
+            mainWindow.setTitle(`${mainWindowTitle} [${file[0]}]`)
+
+            // load
+            mainWindow.webContents.send('main:load', data)
+        } else {
+            const reply = dialog.showMessageBoxSync(mainWindow, {
+                message: 'The file is of incorrect format.',
+                type: 'error',
+                buttons: ['Open New File', 'OK'],
+                defaultId: 1,
+                title: 'Incorrect Format'
+            })
+
+            if (reply === 0) openFile()
+        }
+    }
 }
 
 
@@ -56,20 +134,18 @@ const sendScan = (sWindow) => {
 const openFolder = (item) => {
 
     // show folder open dialog attached to scan window
-    dialog.showOpenDialog(scanWindow, {
+    const dir = dialog.showOpenDialogSync(scanWindow, {
+        title: 'Select Folder to Scan',
+        defaultPath: normalize(app.getPath('pictures')),
         properties: ['openDirectory']
-    }).then(res => {
-
-        console.log(res.filePaths[0], item)
-        if (!res.canceled) {
-            scanWindow.webContents.send('scan:add', {
-                number: item,
-                dir: res.filePaths[0]
-            })
-        } else {
-            console.log('cancelled')
-        }
     })
+
+    if (dir) {
+        scanWindow.webContents.send('scan:add', {
+            number: item,
+            dir: dir[0]
+        })
+    }
 }
 
 
@@ -114,7 +190,7 @@ ipcMain.on('scan:start', (e, dirs) => {
     // check if unsaved state
     let state = getState()
 
-    if (state.stage === 'unsaved') {
+    if (state.stage === 'unsaved' && state.data.length > 0) {
         const ans = dialog.showMessageBoxSync(scanWindow, {
             message: 'Save previous changes before new scan?',
             type: 'question',
@@ -124,7 +200,7 @@ ipcMain.on('scan:start', (e, dirs) => {
         })
 
         if (ans === 0) {
-            if (saveScan(m, scanWindow)) {
+            if (saveScan(state.data, scanWindow)) {
                 const state = {
                     'stage': 'initial',
                     'data': []
@@ -257,14 +333,21 @@ ipcMain.on('main:delete', (e, obj) => {
 
         // update state
         let state = getState()
-        state.data = state.data[obj.currentIndex].urls.filter(urlItem => {
-            urlItem.path !== url
-        })
+        let urls = state.data[obj.currentIndex].urls
+        urls = urls.filter(urlItem => urlItem.path !== url)
+        state.data[obj.currentIndex].urls = urls
+
+        // if no path for current file, remove that file from data
+        if (urls.length === 0) {
+            state.data.splice(obj.currentIndex, 1)
+        }
+
         state.stage = 'unsaved'
+        console.log(state)
         setState(state)
 
         // main:deleted
-        mainWindow.webContents.send('main:deleted', { state, url })
+        mainWindow.webContents.send('main:deleted', state)
     }
 })
 
@@ -305,5 +388,6 @@ module.exports = {
     openFile,
     sendMain,
     sendScan,
-    saveBeforeClose
+    saveBeforeClose,
+    saveScanMenu
 }

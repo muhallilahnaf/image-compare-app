@@ -52,7 +52,57 @@ const findDups = (dict) => {
 // image file extensions
 const extensions = ['jpeg', 'jpg', 'png', 'gif', 'tif', 'tiff', 'bmp']
 
+
+// verify file data before load
+const verifyFile = (data) => {
+    if (!Array.isArray(data)) {
+        console.log('data not array')
+        return false
+    }
+
+    for (const item of data) {
+
+        if (typeof item !== 'object') {
+            console.log('item not object')
+            return false
+        }
+        if (!item.basename || !item.urls) {
+            console.log('basename or urls not exist')
+            return false
+        }
+        if (typeof item.basename !== 'string') {
+            console.log('basename not string')
+            return false
+        }
+        if (!Array.isArray(item.urls)) {
+            console.log('urls not array')
+            return false
+        }
+
+        for (const dir of item.urls) {
+
+            if (typeof dir !== 'object') {
+                console.log('dir not object')
+                return false
+            }
+            if (!dir.path || !dir.fileURL) {
+                console.log('path or fileurl not exist')
+                return false
+            }
+            if (typeof dir.path !== 'string' || typeof dir.fileURL !== 'string') {
+                console.log('path or fileurl not string')
+
+                return false
+            }
+        }
+    }
+    return true
+}
+
+
+// exports
 module.exports = {
     findDups,
-    extensions
+    extensions,
+    verifyFile
 }
