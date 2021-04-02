@@ -1,14 +1,14 @@
-// imports
-const { app, Menu, shell } = require('electron')
-const { openFile, saveScanMenu } = require('./files')
+const { Menu, shell } = require('electron')
+const { getMainWindow } = require('../global')
+const { createScanWindow } = require('./scanWindow')
+const { openFile, saveScanFromMenu } = require('./utils')
 
-let mainWindow
-const getMainWindow = (m) => mainWindow = m
+
 
 // Build menu from template
-const mainMenu = (createSWindow) => {
+const getMainMenu = () => {
 
-    const createScanWindow = createSWindow
+    const mainWindow = getMainWindow()
 
     // main menu template
     let mainMenuTemplate = [
@@ -31,7 +31,7 @@ const mainMenu = (createSWindow) => {
                 {
                     label: 'Save Scan Data',
                     accelerator: process.platform == 'darwin' ? 'Command+S' : 'Ctrl+S',
-                    click: saveScanMenu
+                    click: saveScanFromMenu
                 },
                 {
                     type: 'separator'
@@ -49,6 +49,10 @@ const mainMenu = (createSWindow) => {
                 {
                     label: 'Website',
                     click: () => shell.openExternal('https://muhallilahnaf.github.io/apps.html')
+                },
+                {
+                    label: 'GitHub Repo',
+                    click: () => shell.openExternal('https://github.com/muhallilahnaf/image-compare-app')
                 }
             ]
         }
@@ -82,8 +86,8 @@ const mainMenu = (createSWindow) => {
 }
 
 
-// exports
+
+// export
 module.exports = {
-    mainMenu,
-    getMainWindow
+    getMainMenu
 }
