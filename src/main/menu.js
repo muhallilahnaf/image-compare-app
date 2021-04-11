@@ -1,12 +1,11 @@
-const { Menu, shell } = require('electron')
-const { getMainWindow } = require('../global')
-const { createScanWindow } = require('./scanWindow')
-const { openFile, saveScanFromMenu } = require('./utils')
-
-
 
 // Build menu from template
 const getMainMenu = () => {
+
+    const { Menu, shell } = require('electron')
+    const { getMainWindow } = require('../global')
+    const { createScanWindow } = require('./scanWindow')
+    const { openFile, saveScanFromMenu } = require('./utils')
 
     const mainWindow = getMainWindow()
 
@@ -17,7 +16,6 @@ const getMainMenu = () => {
             submenu: [
                 {
                     label: 'Scan',
-                    accelerator: process.platform == 'darwin' ? 'Command+X' : 'Ctrl+X',
                     click: createScanWindow
                 },
                 {

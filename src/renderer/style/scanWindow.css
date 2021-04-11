@@ -1,0 +1,150 @@
+@font-face {
+    font-family: Lato;
+    src: url('../../../assets/fonts/Lato-Regular.ttf');
+}
+
+@font-face {
+    font-family: Lato;
+    src: url('../../../assets/fonts/Lato-Light.ttf');
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: Lato;
+    src: url('../../../assets/fonts/Lato-Bold.ttf');
+    font-weight: 700;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: Lato, sans-serif;
+}
+
+button {
+    cursor: pointer;
+}
+
+
+
+#scan-container {
+    position: relative;
+    background-color: #252525;
+    padding: 20px;
+    width: 100vw;
+    height: 100vh;
+}
+
+.directory {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.add-dir, #plus, #scan {
+    margin: 0 10px 0 0;
+    padding: 5px;
+    background-color: #686868;
+    outline: black;
+    color: white;
+}
+
+.dir-name {
+    text-align: center;
+    padding: 5px;
+    font-weight: 300;
+    background-color: #333333;
+    border-radius: 5px;
+    min-height: 2em;
+    min-width: 650px;
+    overflow-wrap: break-word;
+    color: white;
+}
+
+#control {
+    margin: 20px 0;
+    position: absolute;
+    bottom: 0;
+    left: 110px;
+}
+
+.option {
+    display: flex;
+    margin-bottom: 20px;
+    font-weight: 300;
+    font-size: 0.875em;
+}
+
+.option-text {
+    color: white;
+    opacity: 0.4;
+    transition: 0.4s;
+}
+
+#option-folder .option-text {
+    margin-right: 5px;
+}
+
+.selected {
+    opacity: 1 !important;
+}
+
+.switch {
+    margin: 0 20px;
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+  
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+  
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #686868;
+    transition: .4s;
+}
+  
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 14px;
+    left: 4px;
+    bottom: 4px;
+    background-color: #333333;
+    transition: .4s;
+}
+    
+input:checked + .slider:before {
+    transform: translateX(18px);
+}
+
+#extensions span {
+    margin-left: 15px;
+    color: white;
+    background-color: #686868;
+    padding: 3px 5px;
+    opacity: 0.4;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#scan {
+    display: block;
+    margin: 30px 0 0 240px;
+    padding: 5px;
+    width: 100px;
+    background-color: #686868;
+    outline: black;
+    color: white;
+}

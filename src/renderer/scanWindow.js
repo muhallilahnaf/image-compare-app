@@ -4,11 +4,18 @@
 const form = document.getElementById('form-dir')
 const plus = document.getElementById('plus')
 const scan = document.getElementById('scan')
+const controlFolder = document.getElementById('option-folder')
+const controlFile = document.getElementById('option-file')
+const controlFolderTexts = controlFolder.querySelectorAll('p')
+const controlFileTexts = controlFile.querySelectorAll('p')
+const extensions = document.querySelectorAll('#extensions span')
 
 
 
 // global variables
 let intervalId
+let isHash = false
+let isRecursive = false
 
 
 
@@ -56,13 +63,46 @@ plus.addEventListener('click', (e) => {
     const div = genAddDir(len)
     form.insertBefore(div, form.lastElementChild)
 
-    if (len + 1 === 5) plus.style.display = 'none'
+    if (len + 1 === 4) plus.style.display = 'none'
 })
 
 
 
-// send dirs to main process
-const sendDirsToMain = () => {
+// event listener for file option
+controlFile.querySelector('input').addEventListener('change', () => {
+
+    for (const node of controlFileTexts) {
+        node.classList.toggle('selected')
+    }
+
+    isHash = !isHash
+})
+
+
+
+// event listener for folder option
+controlFolder.querySelector('input').addEventListener('change', () => {
+
+    for (const node of controlFolderTexts) {
+        node.classList.toggle('selected')
+    }
+
+    isRecursive = !isRecursive
+})
+
+
+
+// toggle extensions
+for (const extension of extensions) {
+    extension.addEventListener('click', () => {
+        extension.classList.toggle('selected')
+    })
+}
+
+
+
+// get directories
+const getDirs = () => {
     const elements = document.getElementsByClassName('dir-name')
     let dirs = []
 
@@ -70,7 +110,7 @@ const sendDirsToMain = () => {
         dirs.push(ele.value)
     }
 
-    window.api.send('scan:start', dirs)
+    return dirs
 }
 
 
@@ -86,9 +126,41 @@ const setScanAnimation = () => {
 
 
 
+const getSelections = () => {
+    const selectedExt = document.querySelectorAll('#extensions .selected')
+    let ext = []
+
+    for (const node of selectedExt) {
+
+        if (node.id === 'jpeg') ext.push('jpg', 'jpeg')
+        if (node.id === 'tiff') ext.push('tif', 'tiff')
+        if (node.id !== 'jpeg' && node.id !== 'tiff') ext.push(node.id)
+    }
+
+    return {
+        isHash,
+        isRecursive,
+        ext
+    }
+}
+
+
+// send data to main
+const sendDataToMain = () => {
+    const selections = getSelections()
+    const dirs = getDirs()
+
+    const data = {
+        selections,
+        dirs
+    }
+    window.api.send('scan:start', data)
+}
+
+
 // event listener for scan button
 scan.addEventListener('click', (e) => {
-    sendDirsToMain()
+    sendDataToMain()
     scan.setAttribute('disabled', 'true')
     setScanAnimation()
 })

@@ -1,6 +1,6 @@
 # imageCompare
 
-A cross platform desktop app to compare similar/duplicate images before deleting.
+A cross platform desktop app to compare and delete similar/duplicate images.
 
 Made using [electron](https://www.electronjs.org).
 
@@ -17,9 +17,12 @@ Made using [electron](https://www.electronjs.org).
 - image extensions supported: .jpeg, .jpg, .png, .gif, .tif, .tiff, .bmp
 
 ### Features To Be Added
-- option to turn off scanning directories recursively
-- option to customize image extensions
-- scan meta data
-- scan videos (have to change the app name tho)
-- responsive UI/ image viewing
+- [x] option to turn off scanning directories recursively
+- [x] option to customize image extensions
+- [ ] scan meta data
+- [ ] scan videos (have to change the app name tho)
+- [x] responsive UI/ image viewing
+- [ ] progress bar
+- [ ] remember last opened folder
+- [ ] keyboard interactions
 - (your feedback)

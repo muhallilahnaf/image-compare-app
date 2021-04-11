@@ -8,9 +8,6 @@ const initialState = { 'stage': 'initial', 'data': [] }
 
 let state = initialState
 
-// image file extensions
-const extensions = ['jpeg', 'jpg', 'png', 'gif', 'tif', 'tiff', 'bmp']
-
 
 // get-set
 const getState = () => state
@@ -36,6 +33,5 @@ module.exports = {
     setScanWindow,
     getMainWindowTitle,
     setMainWindowTitle,
-    extensions,
     initialState
 }

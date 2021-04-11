@@ -1,24 +1,77 @@
 {
-  "name": "image-compare-app",
-  "productName": "imageCompare",
-  "version": "1.0.0",
-  "description": "app to compare similar/duplicate images before deleting",
-  "main": "src/main.js",
-  "scripts": {
-    "start": "electron .",
-    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
-    "package-win": "electron-packager . image-compare-app --overwrite --asar=true --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"imageCompare\"",
-    "package-linux": "electron-packager . image-compare-app --overwrite --asar=true --platform=linux --arch=x64 --icon=assets/icons/png/1024x1024.png --prune=true --out=release-builds"
-  },
-  "author": "muhallilahnaf",
-  "license": "MIT",
-  "dependencies": {
-    "trash": "^7.1.1"
-  },
-  "devDependencies": {
-    "electron": "^12.0.2",
-    "electron-builder": "^22.10.5",
-    "electron-packager": "^15.2.0",
-    "electron-winstaller": "^5.0.0"
-  }
+	"name": "image-compare-app",
+	"productName": "imageCompare",
+	"version": "1.1.0",
+	"description": "compare and delete similar/duplicate images",
+	"author": {
+		"name": "muhallilahnaf",
+		"email": "muhallilahnaf@gmail.com"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/muhallilahnaf/image-compare-app"
+	},
+	"main": "src/main.js",
+	"scripts": {
+		"start": "electron .",
+		"builder-win": "electron-builder -w",
+		"builder-linux": "electron-builder -l",
+		"packager-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=build/icon.icns --prune=true --out=dist"
+	},
+	"dependencies": {
+		"jimp": "^0.16.1",
+		"trash": "^7.1.1"
+	},
+	"devDependencies": {
+		"electron": "^12.0.2",
+		"electron-builder": "^22.10.5",
+		"electron-packager": "^15.2.0"
+	},
+	"build": {
+		"appId": "com.electron.imageCompare",
+		"productName": "imageCompare",
+		"win": {
+			"target": [
+				{
+					"target": "nsis",
+					"arch": [
+						"x64",
+						"ia32"
+					]
+				},
+				{
+					"target": "portable",
+					"arch": [
+						"x64",
+						"ia32"
+					]
+				}
+			],
+			"icon": "build/icon.ico"
+		},
+		"nsis": {
+			"oneClick": false,
+			"perMachine": true,
+			"allowElevation": true,
+			"allowToChangeInstallationDirectory": true,
+			"installerHeader": "build/installerHeader.bmp",
+			"installerSidebar": "build/installerSidebar.bmp",
+			"createDesktopShortcut": true,
+			"createStartMenuShortcut": true
+		},
+		"linux": {
+			"target": [
+				"deb",
+				"AppImage"
+			],
+			"synopsis": "compare and delete similar/duplicate images",
+			"category": "Utility"
+		},
+		"files": [
+			"!release-builds",
+			"!createInstaller.js",
+			"!test.*"
+		]
+	}
 }

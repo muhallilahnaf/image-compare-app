@@ -1,13 +1,15 @@
-const { BrowserWindow, ipcMain } = require('electron')
-const { join } = require('path')
-const { pathToFileURL } = require('url')
-const { getMainWindow, setScanWindow } = require('../global')
-const { ipcMainScanAdd, ipcMainScanStart } = require('./utils')
+const { ipcMain } = require('electron')
+const { ipcScanAdd, ipcScanStart } = require('./utils')
 
 
 
 // create scan window
 const createScanWindow = () => {
+
+    const { BrowserWindow } = require('electron')
+    const { join } = require('path')
+    const { pathToFileURL } = require('url')
+    const { getMainWindow, setScanWindow } = require('../global')
 
     const scanWindow = new BrowserWindow({
         parent: getMainWindow(),
@@ -38,12 +40,12 @@ const createScanWindow = () => {
 
 
 // scan:add
-ipcMain.on('scan:add', ipcMainScanAdd)
+ipcMain.on('scan:add', ipcScanAdd)
 
 
 
 // scan:start
-ipcMain.on('scan:start', ipcMainScanStart)
+ipcMain.on('scan:start', ipcScanStart)
 
 
 

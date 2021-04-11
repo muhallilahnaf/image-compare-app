@@ -1,0 +1,146 @@
+@font-face {
+    font-family: Lato;
+    src: url('../../../assets/fonts/Lato-Regular.ttf');
+}
+
+@font-face {
+    font-family: Lato;
+    src: url('../../../assets/fonts/Lato-Light.ttf');
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: Lato;
+    src: url('../../../assets/fonts/Lato-Bold.ttf');
+    font-weight: 700;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: Lato, sans-serif;
+}
+
+button {
+    cursor: pointer;
+}
+
+
+
+#container {
+    display: flex;
+    background-color: #252525;
+    height: 100vh;
+    width: 100vw;
+    min-height: 635px;
+    min-width: 1260px;
+}
+
+#sidebar {
+    flex-basis: 400px;
+    max-width: 400px;
+    flex-shrink: 0;
+    height: 100%;
+    overflow-y: scroll;
+    background-color: #333333;
+}
+
+#sidebar::-webkit-scrollbar {
+    width: 10px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+    background-color: #4b4949;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background-color: black;
+}
+
+.match {
+    margin: 10px 5px;
+    padding: 5px;
+    background-color: #505050;
+    border-radius: 5px;
+    overflow-wrap: break-word;
+}
+
+.match .basename {
+    margin: 2px 2px 5px 2px;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.match .url {
+    cursor: pointer;
+    margin: 3px 2px 2px 20px;
+    padding: 3px;
+    border-radius: 5px;
+    font-size: small;
+    background-color: #707070;
+}
+
+.match .url:hover {
+    opacity: 0.6;
+}
+
+#main {
+    flex-basis: calc(100% - 410px);
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: 100%;
+    position: relative;
+}
+
+#picdiv {
+    margin-top: 10px;
+    width: 100%;
+    height: calc(100% - 200px);   
+}
+
+#pic {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#pic img {
+    max-width: 95%;
+    max-height: 100%;
+}
+
+#control {
+    position: absolute;
+    bottom: 20px;
+    left: 5%;
+    width: 90%;
+    height: 150px;
+}
+
+#picname {
+    width: 100%;
+    margin-top: 10px;
+    min-height: 2em;
+    max-height: 100px;
+    overflow-wrap: break-word;
+    text-align: center;
+    padding: 5px;
+    font-weight: 300;
+    background-color: #333333;
+    border-radius: 5px;
+    color: white;
+}
+
+#delete {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 50px;
+    margin-left: -25px;
+    padding: 5px;
+    background-color: #686868;
+    outline: black;
+    color: white;
+}

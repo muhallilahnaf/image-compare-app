@@ -2,22 +2,46 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="./style/scanWindow.css">
 </head>
 
 <body>
     <section id="scan-container">
-        <p id="scan-info">
-            Add the root folders to scan.
-            It will scan through all the images inside the folders.
-        </p>
         <form id="form-dir">
             <div class="directory">
                 <button class="add-dir add-1">Add Folder</button><input type="text" class="dir-name name-1" readonly>
             </div>
             <button id="plus">+</button>
         </form>
-        <button id="scan">Scan</button>
+        <div id="control">
+            <div class="option" id="option-file">
+                <p class="option-text selected" id="match-name">match by file name (faster)</p>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+                <p class="option-text" id="match-hash">match by file name, file size and file p-hash (slower)</p>
+            </div>
+            <div class="option" id="option-folder">
+                <p class="option-text selected" id="not-recursive">scan only selected folders</p>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+                <p class="option-text" id="recursive">scan recursively (all folders inside selected folders too)</p>
+            </div>
+            <div class="option" id="option-extension">
+                <p class="option-text selected">image extensions (click to enable/disable):</p>
+                <p id="extensions">
+                    <span id="jpeg" class="selected">jpeg/jpg</span>
+                    <span id="png" class="selected">png</span>
+                    <span id="gif" class="selected">gif</span>
+                    <span id="tiff" class="selected">tiff/tif</span>
+                    <span id="bmp" class="selected">bmp</span>
+                </p>
+            </div>
+            <button id="scan">Scan</button>
+        </div>
     </section>
 </body>
 <script src="./scanWindow.js"></script>

@@ -1,9 +1,9 @@
 const { dialog, app } = require('electron')
-const { readFileSync, writeFileSync, readdirSync, statSync, unlinkSync } = require('fs')
-const { normalize } = require('path')
+const { unlinkSync, existsSync } = require('fs')
+const { normalize, join, } = require('path')
+const { pathToFileURL } = require('url')
 const trash = require('trash')
-const { findDups } = require('./scan')
-const { getState, setState, extensions, getMainWindow, getScanWindow, initialState, getMainWindowTitle } = require('../global')
+const { getState, setState, getMainWindow, getScanWindow, initialState, getMainWindowTitle } = require('../global')
 
 
 
@@ -49,6 +49,8 @@ const saveScanDialog = (window, filename) => {
 
 // save scan result locally
 const saveScan = (data, window) => {
+
+    const { writeFileSync } = require('fs')
 
     const fName = `duplicates_${getTimestamp()}.json`
 
@@ -147,9 +149,14 @@ const setDataAndTitle = (data, window, filename) => {
         'data': data
     }
     setState(newState)
-    window.setTitle(`${getMainWindowTitle()} [${filename}]`)
 
-    window.webContents.send('main:load', data)
+    window.setTitle(`${getMainWindowTitle()} [${filename}]`)
+    const mainWindowHTMLPath = join(__dirname, '..', 'renderer', 'mainWindow.html')
+    window.loadURL(pathToFileURL(mainWindowHTMLPath).href)
+
+    window.webContents.on('did-finish-load', () => {
+        window.webContents.send('main:load', data)
+    })
 }
 
 
@@ -192,12 +199,14 @@ const verifyFile = (data) => {
             }
             if (typeof dir.path !== 'string' || typeof dir.fileURL !== 'string') {
                 console.log('path or fileurl not string')
-
                 return false
             }
+
+            // normalize for current platform
+            dir.path = normalize(dir.path)
         }
     }
-    return true
+    return data
 }
 
 
@@ -205,12 +214,15 @@ const verifyFile = (data) => {
 // read and open file
 const readAndOpenFile = (file, window) => {
 
+    const { readFileSync } = require('fs')
+
     let data = readFileSync(file[0], 'utf8')
     data = JSON.parse(data)
+    const processedData = verifyFile(data)
 
-    if (verifyFile(data)) {
-
+    if (processedData) {
         setDataAndTitle(data, window, file[0])
+
     } else {
         const reply = dialog.showMessageBoxSync(window, {
             message: 'The file is of incorrect format.',
@@ -245,7 +257,7 @@ const openFile = () => {
 
 
 // ipc main on scan:add
-const ipcMainScanAdd = (e, item) => {
+const ipcScanAdd = (e, item) => {
 
     const scanWindow = getScanWindow()
 
@@ -283,7 +295,7 @@ const updateStateOnDelete = (obj, url) => {
 
 
 // ipc main on main:delete
-const ipcMainMainDelete = (e, obj) => {
+const ipcMainDelete = (e, obj) => {
 
     const mainWindow = getMainWindow()
     const url = obj.currentUrl
@@ -306,18 +318,44 @@ const ipcMainMainDelete = (e, obj) => {
 
 
 
+// ipc main on main:checkExistence
+const ipcMainCheckExistence = (e, node) => {
+
+    const mainWindow = getMainWindow()
+    const path = node.matchesPath
+
+    if (existsSync(path)) mainWindow.webContents.send('main:exists', node)
+
+    mainWindow.webContents.send('main:notExists', node)
+}
+
+
+
 // scan image files and create a dictionary
-const scanImages = (dirList) => {
+const scanImages = (data) => {
+
+    const { readdirSync, statSync } = require('fs')
 
     let fileDict = {}
+    let sizeArr = []
+    const isRecursive = data.selections.isRecursive
+    const isHash = data.selections.isHash
+    const extensions = data.selections.ext
 
     // add to fileDict variable
     const addToFileDict = (file, url) => {
+
         if (typeof fileDict[file] === 'undefined') {
             fileDict[file] = [url]
+
         } else if (!fileDict[file].includes(url)) {
             fileDict[file].push(url)
         }
+    }
+
+    // remove duplicate file strings eg. ' - Copy' or '({number})'
+    const processfName = (f) => {
+        return f.replace(/\(\d+\)/, '').replace(/ - Copy/, '')
     }
 
     // scan dirs recursively and identify files and folders
@@ -332,18 +370,27 @@ const scanImages = (dirList) => {
                 if (stats.isFile()) {
                     const ext = item.substring(item.lastIndexOf('.') + 1)
 
-                    if (extensions.some(e => e.toLowerCase() == ext)) addToFileDict(item, fullItem)
+                    if (extensions.some(e => e == ext.toLowerCase())) {
+                        item = processfName(item)
+                        addToFileDict(item, fullItem)
 
-                } else if (stats.isDirectory()) {
+                        if (isHash) sizeArr.push(fullItem)
+                    }
+
+                } else if (isRecursive && stats.isDirectory()) {
                     scanDir(normalize(fullItem))
                 }
             } catch (err) { console.log(err) }
         })
     }
 
+    const dirList = data.dirs.filter(dir => dir != '')
     dirList.forEach(dir => scanDir(dir))
 
-    return fileDict
+    return {
+        fileDict,
+        sizeArr
+    }
 }
 
 
@@ -377,7 +424,9 @@ const alertDupsFound = (window, len) => {
 
 
 // ipc main on scan:start
-const ipcMainScanStart = (e, dirs) => {
+const ipcScanStart = async (e, data) => {
+
+    const { findDups } = require('./scan')
 
     const state = getUnsavedState()
     const scanWindow = getScanWindow()
@@ -387,11 +436,9 @@ const ipcMainScanStart = (e, dirs) => {
         askToSave(scanWindow, state.data, msg, 'Scan')
     }
 
-    const dirList = dirs.filter(dir => dir != '')
+    const scanData = scanImages(data)
 
-    const fileDict = scanImages(dirList)
-
-    const matches = findDups(fileDict)
+    const matches = await findDups(scanData)
 
     scanWindow.webContents.send('scan:finish', 'finished')
 
@@ -408,7 +455,13 @@ const ipcMainScanStart = (e, dirs) => {
             scanWindow.close()
 
             const mainWindow = getMainWindow()
-            mainWindow.webContents.send('main:load', matches)
+            const mainWindowHTMLPath = join(__dirname, '..', 'renderer', 'mainWindow.html')
+            mainWindow.loadURL(pathToFileURL(mainWindowHTMLPath).href)
+
+            mainWindow.webContents.on('did-finish-load', () => {
+                console.log('scan start')
+                mainWindow.webContents.send('main:load', matches)
+            })
 
         } else if (ans === 1 && saveScan(matches, scanWindow)) {
             setState(initialState)
@@ -425,7 +478,8 @@ module.exports = {
     saveScanFromMenu,
     openFile,
     beforeMainWindowClose,
-    ipcMainMainDelete,
-    ipcMainScanAdd,
-    ipcMainScanStart
+    ipcMainDelete,
+    ipcMainCheckExistence,
+    ipcScanAdd,
+    ipcScanStart
 }

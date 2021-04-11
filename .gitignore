@@ -1,5 +1,4 @@
 node_modules
-test.html
-test.js
+test.*
 release-builds
-createInstaller.js
+dist

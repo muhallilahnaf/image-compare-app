@@ -27,14 +27,19 @@ const clearSidebar = () => {
 
 // load pic and filename in box
 const loadPic = () => {
+
     if (currentFileUrl !== null) {
-        pic.style.background = `url('${currentFileUrl}')`
-        pic.style.backgroundRepeat = 'no-repeat'
-        pic.style.backgroundSize = 'contain'
+        const img = document.createElement('img')
+        img.src = currentFileUrl
+        pic.appendChild(img)
         picname.innerHTML = currentUrl
+
     } else {
-        pic.style.background = 'none'
-        picname.innerHTML = ''
+
+        if (pic.firstChild) {
+            pic.firstChild.remove()
+            picname.innerHTML = ''
+        }
     }
 }
 
@@ -45,6 +50,13 @@ const resetCurrent = () => {
     currentUrl = null
     currentFileUrl = null
     currentIndex = null
+}
+
+
+
+// check if image exists
+const checkCurrent = (node) => {
+    window.api.send('main:checkExistence', node)
 }
 
 
@@ -92,8 +104,7 @@ const genSidebarElement = (match, i) => {
         pInner.addEventListener('click', e => {
             resetCurrent()
             loadPic()
-            setCurrent(e.currentTarget)
-            loadPic()
+            checkCurrent(e.currentTarget)
         })
         div.appendChild(pInner)
     })
@@ -132,5 +143,22 @@ deleteButton.addEventListener('click', () => {
 window.api.receive('main:deleted', state => {
     loadSidebar(state.data)
     resetCurrent()
+    loadPic()
+})
+
+
+
+// main:notExists
+window.api.receive('main:notExists', url => {
+    // say the url does not exist
+    // ask if remove from data and sidebar
+    // do what user says
+})
+
+
+
+// main:exists
+window.api.receive('main:exists', node => {
+    setCurrent(node)
     loadPic()
 })
