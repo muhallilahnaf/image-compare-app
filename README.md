@@ -5,10 +5,11 @@ A cross platform desktop app to compare and delete similar/duplicate images.
 Made using [electron](https://www.electronjs.org).
 
 ## Downloads
-- [Windows](https://github.com/muhallilahnaf/image-compare-app/releases/download/1.0.0/image-compare-app-v1.0.0-win32-ia32.zip)
-- [Windows Setup.exe](https://github.com/muhallilahnaf/image-compare-app/releases/download/1.0.0/Setup.exe)
-- [Mac](https://github.com/muhallilahnaf/image-compare-app/releases/download/1.0.0/imageCompare-v1.0.0-darwin-x64.zip)
-- [Debian](https://github.com/muhallilahnaf/image-compare-app/releases/download/1.0.0/image-compare-app-v1.0.0-linux-x64.zip)
+- [Windows Portable (.exe)](https://github.com/muhallilahnaf/image-compare-app/releases/download/v1.1.0/Windows-portable-exe.imageCompare-v1.1.0.exe)
+- [Windows Setup (.exe)](https://github.com/muhallilahnaf/image-compare-app/releases/download/v1.1.0/Windows-setup-exe.imageCompare-setup-v1.1.0.exe)
+- [MacOS (.app)](https://github.com/muhallilahnaf/image-compare-app/releases/download/v1.1.0/MacOS-app.imageCompare-v1.1.0.zip)
+- [Linux Debian package (.deb)](https://github.com/muhallilahnaf/image-compare-app/releases/download/v1.1.0/image-compare-app_1.1.0_amd64.deb)
+- [Linux AppImage (.AppImage)](https://github.com/muhallilahnaf/image-compare-app/releases/download/v1.1.0/Linux-AppImage.imageCompare-v1.1.0.AppImage)
 
 ### Features
 - scan directories recursively for duplicate/similar images (by file names)
@@ -20,8 +21,9 @@ Made using [electron](https://www.electronjs.org).
 - [x] option to turn off scanning directories recursively
 - [x] option to customize image extensions
 - [ ] scan meta data
-- [ ] scan videos (have to change the app name tho)
 - [x] responsive UI/ image viewing
+- [x] scan comparing image size and p-hash
+- [x] home screen
 - [ ] progress bar
 - [ ] remember last opened folder
 - [ ] keyboard interactions
